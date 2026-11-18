@@ -191,14 +191,22 @@
   // 3. 무작위 특수문자 삽입
   const obfuscated = insertRandomSpecialChars(raw, 4);
 
+// [수정 1] 한글(UTF-8) 바이트 길이 계산 버그 방지 처리 추가
+  const utf8SafeText = unescape(encodeURIComponent(obfuscated));
+
+  // 기존 QR 코드 영역 비우기 (기존 유지)
   if (qrInstance) {
     qrContainer.innerHTML = '';
   }
+
+  // [수정 2] 변환된 텍스트 전달 및 오류 복원 등급(correctLevel)을 M으로 조정
   qrInstance = new QRCode(qrContainer, {
-    text: obfuscated, // 한글이 포함된 문자열 그대로 생성
-    width: 240,       // 모바일 대응을 위해 크기 살짝 조절
-    height: 240
+    text: utf8SafeText,
+    width: 240,
+    height: 240,
+    correctLevel: QRCode.CorrectLevel.M
   });
+
 
   if (qrTimer) clearTimeout(qrTimer);
   statusEl.textContent = '이 QR은 10초 동안만 유효합니다.'; // 시간은 편의에 따라 조절하세요
